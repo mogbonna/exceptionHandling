@@ -20,7 +20,7 @@ Welcome to the **Python Exception Handling Course** — a beginner-friendly yet 
 | Project No.   | Title                                                 | Key Concepts                                                                     |
 | ------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------- |
 | 1             | **Simple ATM Simulator**                              | Handles errors like invalid input, low balance, and more using exception handlin |
-| 2             | **Hospital Patient Manager**                          | Uses custom exceptions for real-time input validation                            |
+| 2             | **Student Grade Calculator**                          | Handles errors like invalid input, missing data, or negative scores              |
 | 3             | **Password Strength Checker**                         | Validates security rules with detailed feedback                                  |
 | 4             | **Daily Expense Tracker**                             | Handles financial inputs, zero/negative values, and summaries                    |
 | 5             | **Login & Registration System**                       | Implements user accounts, password masking, and file storage                     |
