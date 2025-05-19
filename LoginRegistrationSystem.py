@@ -1,98 +1,163 @@
-import getpass
+import sys
 import os
+import re
 
-class UsernameAlreadyExists(Exception): pass
-class InvalidUsernameOrPassword(Exception): pass
+# -------------------------
+# Custom Exceptions
+# -------------------------
+class UserAlreadyExistsError(Exception): pass
+class UserNotFoundError(Exception): pass
+class InvalidPasswordError(Exception): pass
+class WeakPasswordError(Exception): pass
 
-class PasswordTooShortError(Exception): pass
-class MissingUppercaseError(Exception): pass
-class MissingLowercaseError(Exception): pass
-class MissingDigitError(Exception): pass
-class MissingSpecialCharError(Exception): pass
-
-def check_password_strength(password):
+# -------------------------
+# Password Strength Checker
+# -------------------------
+def is_strong_password(password):
     if len(password) < 8:
-        raise PasswordTooShortError("Password must be at least 8 characters.")
-    if not any(c.isupper() for c in password):
-        raise MissingUppercaseError("Include at least one UPPERCASE letter.")
-    if not any(c.islower() for c in password):
-        raise MissingLowercaseError("Include at least one lowercase letter.")
-    if not any(c.isdigit() for c in password):
-        raise MissingDigitError("Include at least one digit.")
-    if not any(c in "!@#$%^&*()-_=+[]{}" for c in password):
-        raise MissingSpecialCharError("Include at least one special character (!@#...).")
-    return True
+        return False, "Password must be at least 8 characters long."
+    if not re.search(r"[A-Z]", password):
+        return False, "Password must include at least one uppercase letter."
+    if not re.search(r"[a-z]", password):
+        return False, "Password must include at least one lowercase letter."
+    if not re.search(r"\d", password):
+        return False, "Password must include at least one digit."
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+        return False, "Password must include at least one special character."
+    return True, ""
 
-def load_users(filename="users.txt"):
+# -------------------------
+# Password Input with '*' Masking
+# -------------------------
+def input_password(prompt='Password: '):
+    print(prompt, end='', flush=True)
+    password = ''
+    
+    try:
+        # For Windows
+        import msvcrt
+        while True:
+            ch = msvcrt.getch()
+            if ch in {b'\r', b'\n'}:
+                print()
+                break
+            elif ch == b'\x08':  # Backspace
+                if len(password) > 0:
+                    password = password[:-1]
+                    sys.stdout.write('\b \b')
+            elif ch == b'\x03':  # Ctrl+C
+                raise KeyboardInterrupt
+            else:
+                try:
+                    char = ch.decode()
+                    password += char
+                    sys.stdout.write('*')
+                except:
+                    continue
+    except ImportError:
+        # For Linux/macOS
+        import tty
+        import termios
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(fd)
+            while True:
+                ch = sys.stdin.read(1)
+                if ch in {'\r', '\n'}:
+                    print()
+                    break
+                elif ch == '\x7f':  # Backspace
+                    if len(password) > 0:
+                        password = password[:-1]
+                        sys.stdout.write('\b \b')
+                elif ch == '\x03':  # Ctrl+C
+                    raise KeyboardInterrupt
+                else:
+                    password += ch
+                    sys.stdout.write('*')
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+
+    return password
+
+# -------------------------
+# User Data Functions
+# -------------------------
+def load_users():
     users = {}
-    if os.path.exists(filename):
-        with open(filename, "r") as f:
+    if os.path.exists("users.txt"):
+        with open("users.txt", "r") as f:
             for line in f:
                 if ":" in line:
-                    username, password = line.strip().split(":", 1)
+                    username, password = line.strip().split(":")
                     users[username] = password
     return users
 
-def save_user(username, password, filename="users.txt"):
-    with open(filename, "a") as f:
+def save_user(username, password):
+    with open("users.txt", "a") as f:
         f.write(f"{username}:{password}\n")
 
-users = load_users()
-
-def register(username, password):
+# -------------------------
+# Registration
+# -------------------------
+def register():
+    users = load_users()
+    username = input("Choose a username: ")
     if username in users:
-        raise UsernameAlreadyExists("Username already taken.")
-    
-    check_password_strength(password)
-    
-    users[username] = password
+        raise UserAlreadyExistsError("Username already exists.")
+
+    while True:
+        password = input_password("Choose a strong password: ")
+        valid, message = is_strong_password(password)
+        if valid:
+            break
+        else:
+            print("❌ Weak password:", message)
+
     save_user(username, password)
-    print("Registration successful.")
+    print("✅ Registration successful!")
 
-def login(username, password):
-    if username not in users or users[username] != password:
-        raise InvalidUsernameOrPassword("Invalid login credentials.")
-    print("Login successful. Welcome,", username)
+# -------------------------
+# Login
+# -------------------------
+def login():
+    users = load_users()
+    username = input("Enter username: ")
+    if username not in users:
+        raise UserNotFoundError("User not found.")
+    password = input_password("Enter password: ")
+    if users[username] != password:
+        raise InvalidPasswordError("Incorrect password.")
+    print(f"✅ Welcome, {username}!")
 
+# -------------------------
+# Main Menu
+# -------------------------
 while True:
     try:
-        print("\n=== User System ===")
+        print("\n🔐 Login & Registration System")
         print("1. Register")
         print("2. Login")
         print("3. Exit")
 
-        choice = input("Choose an option: ")
+        option = input("Choose an option: ")
 
-        if choice == '1':
-            uname = input("Enter username: ")
-            pwd = getpass.getpass("Enter password (input hidden): ")
-            register(uname, pwd)
-
-        elif choice == '2':
-            uname = input("Enter username: ")
-            pwd = getpass.getpass("Enter password (input hidden): ")
-            login(uname, pwd)
-
-        elif choice == '3':
+        if option == '1':
+            register()
+        elif option == '2':
+            login()
+        elif option == '3':
             print("Goodbye!")
             break
-
         else:
-            print("Invalid option. Choose 1–3.")
+            print("Invalid option.")
 
-    except (UsernameAlreadyExists,
-            PasswordTooShortError,
-            MissingUppercaseError,
-            MissingLowercaseError,
-            MissingDigitError,
-            MissingSpecialCharError) as e:
-        print("Registration failed:", e)
-
-    except InvalidUsernameOrPassword as ie:
-        print("Login failed:", ie)
+    except (UserAlreadyExistsError, UserNotFoundError, InvalidPasswordError, WeakPasswordError) as e:
+        print("❌", e)
 
     except KeyboardInterrupt:
-        print("\nProgram cancelled.")
+        print("\nProgram interrupted.")
         break
 
     finally:
