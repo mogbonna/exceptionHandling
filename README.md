@@ -17,14 +17,14 @@ Welcome to the **Python Exception Handling Course** — a beginner-friendly yet 
 
 ## 💡 Mini Projects Included
 
-| Project No.   | Title                                                 | Key Concepts                                                  |
-| ------------- | ----------------------------------------------------- | ------------------------------------------------------------- |
-| 1             | **Number Divider**                                    | Handles division and invalid input errors                     |
-| 2             | **Hospital Patient Manager**                          | Uses custom exceptions for real-time input validation         |
-| 3             | **Password Strength Checker**                         | Validates security rules with detailed feedback               |
-| 4             | **Daily Expense Tracker**                             | Handles financial inputs, zero/negative values, and summaries |
-| 5             | **Login & Registration System**                       | Implements user accounts, password masking, and file storage  |
-| 6️⃣ (Optional) | Extendable for GUI, hashing, and persistent databases |                                                               |
+| Project No.   | Title                                                 | Key Concepts                                                                     |
+| ------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------- |
+| 1             | **Simple ATM Simulator**                              | Handles errors like invalid input, low balance, and more using exception handlin |
+| 2             | **Hospital Patient Manager**                          | Uses custom exceptions for real-time input validation                            |
+| 3             | **Password Strength Checker**                         | Validates security rules with detailed feedback                                  |
+| 4             | **Daily Expense Tracker**                             | Handles financial inputs, zero/negative values, and summaries                    |
+| 5             | **Login & Registration System**                       | Implements user accounts, password masking, and file storage                     |
+| 6️⃣ (Optional) | Extendable for GUI, hashing, and persistent databases |                                                                                  |
 
 Each project is written in **clean Python**, uses **step-by-step exception handling**, and includes **practical challenges** to deepen your understanding.
 
